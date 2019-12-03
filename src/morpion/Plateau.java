@@ -2,8 +2,6 @@
  * @author LudovicB
  * @version 1.1
  * 
- * 2) Génération des cases grace à un constructeur et initialisation de la grille
- * 3) Début du jeu 
  */
 
 package morpion;
@@ -14,7 +12,10 @@ public class Plateau {
 
 	private static Case[][] l_tabCases = new Case[3][3];
 	
-	public static void main (String [] args) throws VerifEntreeUtilisateur {
+	private static String gagnant = null;
+	
+	public static void main (String [] args) {
+		Plateau.ConstructionGrille();
 	DemandeCaseUtilisateur();
 
 	}
@@ -77,46 +78,78 @@ public class Plateau {
 /**
  * Méthode DemandeCaseUtilisateur() dans la console
  * 
- * 
+ * L'état de la case change seulement si elle est vide
  */
 	public static void DemandeCaseUtilisateur() {
 		afficheGrille();
 		
-			int tour = 0;
-			while (tour < 10) {
-				Scanner case_choisie_j1 = new Scanner(System.in);
-				System.out.println(Joueurs.Joueur1.getNom() + " commence, choisissez une case en donnant ses coordonnées (numéro de la colonne puis numero de la ligne) :");
-				String case_j1 = case_choisie_j1.nextLine();
+			int coordonnee_x_j1 = 0;
+			int coordonnee_y_j1 = 0;
+			int coordonnee_x_j2 = 0;
+			int coordonnee_y_j2 = 0;
+			
+			//bool fin de partie
+			boolean game_over = true;
+			
+			do { //partie en cours
 				
+				boolean case_occupee_tour_j1 = false;
+				
+				if(game_over) {
+				do {
+				// Demande au joueur 1 une case
+				Scanner case_choisie_j1 = new Scanner(System.in);
+				System.out.println(Joueurs.Joueur1.getNom() + ", choisissez une case en donnant ses coordonnées (numéro de la colonne puis numero de la ligne) :");
+				String case_j1 = case_choisie_j1.nextLine();
 
 				String cases_j1[] = case_j1.split(","); // Sépare les membres du string en plusieurs string (entre chaque virgule)
-				int coordonnee_x_j1 = Integer.parseInt(cases_j1[0])-1; // Transformation de string en int de la coordonnée x (-1 car tableau)
-				int coordonnee_y_j1 = Integer.parseInt(cases_j1[1])-1;
+				coordonnee_x_j1 = Integer.parseInt(cases_j1[0])-1; // Transformation de string en int de la coordonnée x (-1 car tableau)
+				coordonnee_y_j1 = Integer.parseInt(cases_j1[1])-1;
 				
-//				if (coordonnee_x_j1>3 || coordonnee_x_j1<0) {
-//					throw new VerifEntreeUtilisateur();
-//				}
-				
+				// Si la case est vide, on change l'etat de la case, on met le booleen en false pour sortir de la boucle
+				if(l_tabCases[coordonnee_y_j1][coordonnee_x_j1].getEtat() == ' ') {
 				l_tabCases[coordonnee_y_j1][coordonnee_x_j1].setEtat(Joueurs.Joueur1.getSigne());
+				case_occupee_tour_j1 = false;
+				}
+				else {
+					System.out.println("Case occupée...");
+					case_occupee_tour_j1 = true;
+				}
+				} while (case_occupee_tour_j1 == true);
+				game_over = VerifPartieTerminee_J1(coordonnee_y_j1,coordonnee_x_j1);
+				}
 				
-				tour++;
 				afficheGrille();
 				
+				boolean case_occupee_tour_j2 = false;
+				
+				if(game_over) {
+				do {
+				// Demande au joueur 2 une case
 				Scanner case_choisie_j2 = new Scanner(System.in);
 				System.out.println(Joueurs.Joueur2.getNom() + ", choisissez une case en donnant ses coordonnées (numéro de la colonne puis numero de la ligne) :");
 				String case_j2 = case_choisie_j2.nextLine();
 				
-
 				String cases_j2[] = case_j2.split(","); // Sépare les membres du string en plusieurs string (entre chaque virgule)
-				int coordonnee_x_j2 = Integer.parseInt(cases_j2[0])-1; // Transformation de string en int de la coordonnée x (-1 car tableau)
-				int coordonnee_y_j2 = Integer.parseInt(cases_j2[1])-1;
+				coordonnee_x_j2 = Integer.parseInt(cases_j2[0])-1; // Transformation de string en int de la coordonnée x (-1 car tableau)
+				coordonnee_y_j2 = Integer.parseInt(cases_j2[1])-1;
+				
+				// Si la case est vide, on change l'etat de la case, on met le booleen en false pour sortir de la boucle
+				if(l_tabCases[coordonnee_y_j2][coordonnee_x_j2].getEtat() == ' ') {
 				l_tabCases[coordonnee_y_j2][coordonnee_x_j2].setEtat(Joueurs.Joueur2.getSigne());
-
-
-				tour++;
+				case_occupee_tour_j2 = false;
+				}
+				else {
+					System.out.println("Case occupée...");
+					case_occupee_tour_j2 = true;
+				}
+				} while (case_occupee_tour_j2 == true);
+				game_over = VerifPartieTerminee_J2(coordonnee_y_j2, coordonnee_x_j2);
+				}
+				
 				afficheGrille();
-			}
-			 
+			} while(game_over); //Fin du jeu
+			System.out.println(gagnant + " a gagné");
 
 			
 
@@ -127,17 +160,93 @@ public class Plateau {
 //			case_choisie_j1.close();
 //			case_choisie_j2.close();			
 			
-		}	
-	
-	class VerifEntreeUtilisateur extends Exception{ 
-		  public VerifEntreeUtilisateur(){
-		    System.out.println("Veuillez séléctionne une case valide !");
-		  }  
 		}
 	
+/**
+ * Méthode VerifPartieTerminee() dans la console
+ * 
+ * Vérification du signe des cases adjacentes à la case donnée par le joueur 1
+ * Vérification du signe des diagonales
+ * 
+ * @param coordonnee_x_j1 
+ * @param coordonnee_y_j1 
+ * @return 
+ */
+	public static boolean VerifPartieTerminee_J1(int coordonnee_y_j1, int coordonnee_x_j1) {
+		// Vérification si partie terminée verticalement
+		if(l_tabCases[coordonnee_y_j1][0].getEtat() == Joueurs.Joueur1.getSigne() && l_tabCases[coordonnee_y_j1][1].getEtat() == Joueurs.Joueur1.getSigne() && l_tabCases[coordonnee_y_j1][2].getEtat() == Joueurs.Joueur1.getSigne()) {
+			gagnant = Joueurs.Joueur1.getNom();
+			return false;
+		}
+		// Vérification si partie terminée horizontalement
+		if(l_tabCases[0][coordonnee_x_j1].getEtat() == Joueurs.Joueur1.getSigne() && l_tabCases[1][coordonnee_x_j1].getEtat() == Joueurs.Joueur1.getSigne() && l_tabCases[2][coordonnee_x_j1].getEtat() == Joueurs.Joueur1.getSigne()) {
+			gagnant = Joueurs.Joueur1.getNom();
+			return false;
+		}
+		// Vérification si partie terminée diagonalement
+		if(l_tabCases[0][0].getEtat() == Joueurs.Joueur1.getSigne() && l_tabCases[1][1].getEtat() == Joueurs.Joueur1.getSigne() && l_tabCases[2][2].getEtat() == Joueurs.Joueur1.getSigne()) {
+			gagnant = Joueurs.Joueur1.getNom();
+			return false;
+		}
+		// Vérification si partie terminée diagonalement
+		if(l_tabCases[2][0].getEtat() == Joueurs.Joueur1.getSigne() && l_tabCases[1][1].getEtat() == Joueurs.Joueur1.getSigne() && l_tabCases[0][2].getEtat() == Joueurs.Joueur1.getSigne()) {
+			gagnant = Joueurs.Joueur1.getNom();
+			return false;
+		}
+		return true;
+	}
+		
+/**
+ * Méthode VerifPartieTerminee_J2() dans la console
+ * 
+ * Vérification du signe des cases adjacentes à la case donnée par le joueur 2
+ * Vérification du signe des diagonales
+ * 
+ * @param coordonnee_x_j2 
+ * @param coordonnee_y_j2 
+ * @return 
+ */
+	public static boolean VerifPartieTerminee_J2(int coordonnee_y_j2, int coordonnee_x_j2) {
+		// Vérification si partie terminée verticalement
+		if(l_tabCases[coordonnee_y_j2][0].getEtat() == Joueurs.Joueur2.getSigne() && l_tabCases[coordonnee_y_j2][1].getEtat() == Joueurs.Joueur2.getSigne() && l_tabCases[coordonnee_y_j2][2].getEtat() == Joueurs.Joueur2.getSigne()) {
+			gagnant = Joueurs.Joueur2.getNom();
+			return false;
+		}
+		// Vérification si partie terminée horizontalement
+		if(l_tabCases[0][coordonnee_x_j2].getEtat() == Joueurs.Joueur2.getSigne() && l_tabCases[1][coordonnee_x_j2].getEtat() == Joueurs.Joueur2.getSigne() && l_tabCases[2][coordonnee_x_j2].getEtat() == Joueurs.Joueur2.getSigne()) {
+			gagnant = Joueurs.Joueur2.getNom();
+			return false;
+		}
+		// Vérification si partie terminée diagonalement
+		if(l_tabCases[0][0].getEtat() == Joueurs.Joueur2.getSigne() && l_tabCases[1][1].getEtat() == Joueurs.Joueur2.getSigne() && l_tabCases[2][2].getEtat() == Joueurs.Joueur2.getSigne()) {
+			return false;
+		}
+		// Vérification si partie terminée diagonalement
+		if(l_tabCases[2][0].getEtat() == Joueurs.Joueur2.getSigne() && l_tabCases[1][1].getEtat() == Joueurs.Joueur2.getSigne() && l_tabCases[0][2].getEtat() == Joueurs.Joueur2.getSigne()) {
+			gagnant = Joueurs.Joueur2.getNom();
+			return false;
+		}
+		return true;
+		}
+}
 
+//int horizontal_j1 = 0;
+//try {
+//if(l_tabCases[coordonnee_y_j1][coordonnee_x_j1-1].getEtat() == Joueurs.Joueur1.getSigne()) {
+//	horizontal_j1 = horizontal_j1+1;
+//}
+//}
+//catch(ArrayIndexOutOfBoundsException ex)
+//{
+//	
+//}
+//if(l_tabCases[coordonnee_y_j1][coordonnee_x_j1+1].getEtat() == Joueurs.Joueur1.getSigne()) {
+//	horizontal_j1 = horizontal_j1+1;
+//}
+//if(horizontal_j1 == 2) {
+//	System.out.println(Joueurs.Joueur1.getNom() + " a gagné");
+//}
 	
 
 		
-	}
 
