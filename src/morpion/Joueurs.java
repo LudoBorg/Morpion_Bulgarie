@@ -100,5 +100,22 @@ public class Joueurs {
 		Joueur2 = new Joueurs(nom_j2, signe_j2); //Construction du joueur 2
 		System.out.println("Joueur 2 : " + Joueur2.getNom() + ", Signe : " + Joueur2.getSigne()); //Utilisation de méthodes pour afficher le nom et le signe du joueur 2
 	}
+	
+	public static void CreerJoueur1(String nom, boolean signe) {
+		if(signe) {
+			Joueur1 = new Joueurs(nom, 'O');
+		} else {
+			Joueur1 = new Joueurs(nom, 'X');
+		}
+	}
+	
+	public static void CreerJoueur2(String nom) {
+		char SigneJ1 = Joueur1.getSigne();
+		if(SigneJ1 == 'X') {
+			Joueur2 = new Joueurs(nom, 'O');
+		} else {
+			Joueur2 = new Joueurs(nom, 'X');
+		}
+	}
 }
 

@@ -14,11 +14,11 @@ public class Plateau {
 	
 	private static String gagnant = null;
 	
-	public static void main (String [] args) {
-		Plateau.ConstructionGrille();
-	DemandeCaseUtilisateur();
-
-	}
+//	public static void main (String [] args) {
+//		Plateau.ConstructionGrille();
+//	DemandeCaseUtilisateur();
+//
+//	}
 	
 /**
  * Méthode qui constuit un tableau de 3X3
@@ -97,28 +97,36 @@ public class Plateau {
 				
 				if(game_over) {
 				do {
-				// Demande au joueur 1 une case
-				Scanner case_choisie_j1 = new Scanner(System.in);
-				System.out.println(Joueurs.Joueur1.getNom() + ", choisissez une case en donnant ses coordonnées (numéro de la colonne puis numero de la ligne) :");
-				String case_j1 = case_choisie_j1.nextLine();
+//					try {
+					// Demande au joueur 1 une case
+					Scanner case_choisie_j1 = new Scanner(System.in);
+					System.out.println(Joueurs.Joueur1.getNom() + ", choisissez une case en donnant ses coordonnées (numéro de la colonne puis numero de la ligne) :");
+					String case_j1 = case_choisie_j1.nextLine();
 
-				String cases_j1[] = case_j1.split(","); // Sépare les membres du string en plusieurs string (entre chaque virgule)
-				coordonnee_x_j1 = Integer.parseInt(cases_j1[0])-1; // Transformation de string en int de la coordonnée x (-1 car tableau)
-				coordonnee_y_j1 = Integer.parseInt(cases_j1[1])-1;
+					String cases_j1[] = case_j1.split(","); // Sépare les membres du string en plusieurs string (entre chaque virgule)
+					coordonnee_x_j1 = Integer.parseInt(cases_j1[0])-1; // Transformation de string en int de la coordonnée x (-1 car tableau)
+					coordonnee_y_j1 = Integer.parseInt(cases_j1[1])-1;
+					
+					// Si la case est vide, on change l'etat de la case, on met le booleen en false pour sortir de la boucle
+					if(l_tabCases[coordonnee_y_j1][coordonnee_x_j1].getEtat() == ' ') {
+					l_tabCases[coordonnee_y_j1][coordonnee_x_j1].setEtat(Joueurs.Joueur1.getSigne());
+					case_occupee_tour_j1 = false;
+					}
+					else {
+						System.out.println("Case occupée...");
+						case_occupee_tour_j1 = true;
+					}
+					} while (case_occupee_tour_j1 == true);
+					game_over = VerifPartieTerminee_J1(coordonnee_y_j1,coordonnee_x_j1);
+					}
+					
+//					catch(ArrayIndexOutOfBoundsException ex) {
+//						System.out.println("La case n'existe pas..." );
+//						    // traitement à faire dans ce cas
+//					}
+
 				
-				// Si la case est vide, on change l'etat de la case, on met le booleen en false pour sortir de la boucle
-				if(l_tabCases[coordonnee_y_j1][coordonnee_x_j1].getEtat() == ' ') {
-				l_tabCases[coordonnee_y_j1][coordonnee_x_j1].setEtat(Joueurs.Joueur1.getSigne());
-				case_occupee_tour_j1 = false;
-				}
-				else {
-					System.out.println("Case occupée...");
-					case_occupee_tour_j1 = true;
-				}
-				} while (case_occupee_tour_j1 == true);
-				game_over = VerifPartieTerminee_J1(coordonnee_y_j1,coordonnee_x_j1);
-				}
-				
+
 				afficheGrille();
 				
 				boolean case_occupee_tour_j2 = false;
@@ -230,23 +238,7 @@ public class Plateau {
 		}
 }
 
-//int horizontal_j1 = 0;
-//try {
-//if(l_tabCases[coordonnee_y_j1][coordonnee_x_j1-1].getEtat() == Joueurs.Joueur1.getSigne()) {
-//	horizontal_j1 = horizontal_j1+1;
-//}
-//}
-//catch(ArrayIndexOutOfBoundsException ex)
-//{
-//	
-//}
-//if(l_tabCases[coordonnee_y_j1][coordonnee_x_j1+1].getEtat() == Joueurs.Joueur1.getSigne()) {
-//	horizontal_j1 = horizontal_j1+1;
-//}
-//if(horizontal_j1 == 2) {
-//	System.out.println(Joueurs.Joueur1.getNom() + " a gagné");
-//}
-	
+
 
 		
 
